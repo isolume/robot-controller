@@ -1,0 +1,8 @@
+[package]
+name = "robot-controller"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+paho-mqtt = { version = "0.12.1", features=["vendored-ssl"] }
+dotenv = "0.15.0"
