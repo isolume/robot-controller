@@ -10,18 +10,8 @@ fn main() {
     
     dotenv().ok();
 
-    let host = env::var("HOST").unwrap_or_else(|_| {
-        println!("Host not set");
-        process::exit(1);
-    });
-
-    let username = env::var("USERNAME").unwrap_or_else(|_| String::from(""));
-    let password = env::var("PASSWORD").unwrap_or_else(|_| String::from(""));
-
-    let topic = env::var("TOPIC").unwrap_or_else(|_| {
-        println!("Topic not set");
-        process::exit(1);
-    });
+    let host = env::var("HOST").expect("$HOST not set");
+    let topic = env::var("TOPIC").expect("$TOPIC not set");
 
     let cli = mqtt::AsyncClient::new(host).unwrap_or_else(|err| {
         println!("Error creating the client: {}", err);
@@ -30,12 +20,12 @@ fn main() {
 
     let mut conn_builder = mqtt::ConnectOptionsBuilder::new_ws();
 
-    if !username.is_empty() {
-        conn_builder.user_name(username);
-    }
-
-    if !password.is_empty() {
-        conn_builder.password(password);
+    match (env::var("USERNAME"), env::var("PASSWORD")) {
+        (Ok(username), Ok(password)) => {
+            conn_builder.user_name(username)
+                .password(password);
+        }
+        _ => {}
     }
 
     let conn_opts = conn_builder.finalize();
@@ -52,5 +42,5 @@ fn main() {
         if let Err(e) = tok.wait() {
             println!("Error sending message: {:?}", e);
         }
-    }
+    }    
 }
